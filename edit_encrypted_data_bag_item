@@ -64,7 +64,7 @@ if item_file_path.nil?
   $stderr.puts 'Data bag item missing!'
   exit 1
 end
-recovery_file_path = File.join(File.dirname(item_file_path),".#{File.basename(item_file_path)}.saved")
+recovery_file_path = File.join(File.dirname(item_file_path), ".#{File.basename(item_file_path)}.saved")
 
 if File.exist?(item_file_path)
   item_file_contents = IO.read(item_file_path)
