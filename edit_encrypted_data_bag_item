@@ -1,0 +1,123 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+
+begin
+  require 'chef'
+rescue LoadError
+  $stderr.puts "Could not load 'chef', please make sure this gem is installed."
+  exit 1
+end
+
+############################
+### command line options ###
+############################
+
+options = {}
+options[:secret_file] = ENV['ENCRYPTED_DATA_BAG_SECRET'] ||
+                        File.join(ENV['HOME'], '.chef', 'encrypted_data_bag_secret')
+options[:format_version] = 2
+options[:editor] = ENV['EDITOR'] || 'vi'
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: #{File.basename($PROGRAM_NAME)} <data bag item> [options]"
+  opts.on('-s',
+          '--secret file',
+          'encrypted data bag secret file',
+          '(default: $ENCRYPTED_DATA_BAG_SECRET or $HOME/.chef/encrypted_data_bag_secret)') do |secret|
+    options[:secret_file] = secret
+  end
+  opts.on('-f',
+          '--format version',
+          'encrypted data bag format version (default: 2)',
+          'http://docs.opscode.com/chef/essentials_data_bags.html#encryption-versions') do |format|
+    options[:format_version] = format.to_i
+  end
+  opts.on('-e',
+          '--editor name',
+          'editor to use (default: $EDITOR or vi)') do |editor|
+    options[:editor] = editor
+  end
+  opts.on_tail('-h', '--help', 'Show this message') do
+    puts opts
+    exit
+  end
+end.parse!
+
+##########################
+### Verify secret file ###
+##########################
+
+unless File.exist?(options[:secret_file])
+  $stderr.puts "Could not find encrypted data bag secret at #{options[:secret_file]}, exiting."
+  exit 1
+end
+
+##########################
+### Initial data setup ###
+##########################
+
+secret = Chef::EncryptedDataBagItem.load_secret options[:secret_file]
+Chef::Config[:data_bag_encrypt_version] = options[:format_version]
+
+item_file_path = ARGV.pop
+if item_file_path.nil?
+  $stderr.puts 'Data bag item missing!'
+  exit 1
+end
+recovery_file_path = File.join(File.dirname(item_file_path),".#{File.basename(item_file_path)}.saved")
+
+if File.exist?(item_file_path)
+  item_file_contents = IO.read(item_file_path)
+else
+  item_base_name = File.basename(item_file_path, '.*')
+  puts "Data bag item '#{item_base_name}' doesn't exist, creating template..."
+  item_file_contents = "{ \"id\": \"#{item_base_name}\" }"
+end
+
+#########################
+### Begin actual work ###
+#########################
+
+temp_file = Tempfile.new "#{(0..8).map { rand(36).to_s(36) }.join}-"
+md5_before = nil
+md5_after = nil
+begin
+  if File.exist? recovery_file_path
+    $stderr.puts "Recovering from #{recovery_file_path}..."
+    temp_file.write IO.read(recovery_file_path)
+    File.delete(recovery_file_path)
+  else
+    # read in encrypted data bag
+    before_raw_hash = Chef::JSONCompat.from_json(item_file_contents)
+    before_data_bag_item = Chef::EncryptedDataBagItem.new(before_raw_hash, secret)
+    # write unencrypted data bag contents to temporary file for editing
+    unencrypted_before = Chef::JSONCompat.to_json_pretty(before_data_bag_item.to_hash)
+    md5_before = Digest::MD5.hexdigest(unencrypted_before)
+    temp_file.write unencrypted_before
+  end
+  temp_file.rewind # needed so file is actually written
+  system("#{options[:editor]} #{temp_file.path}")
+  # read in edits, validate parsing
+  begin
+    unencrypted_after = IO.read(temp_file.path)
+    md5_after = Digest::MD5.hexdigest(unencrypted_after)
+    after_raw_hash = Chef::JSONCompat.from_json(unencrypted_after)
+  rescue Yajl::ParseError
+    $stderr.puts "Error parsing JSON! Recovering to #{recovery_file_path}..."
+    IO.write(recovery_file_path, IO.read(temp_file.path))
+    exit 1
+  end
+  if !md5_before.eql?(md5_after)
+    after_data_bag_item = Chef::EncryptedDataBagItem.encrypt_data_bag_item(after_raw_hash, secret)
+    IO.write(item_file_path, Chef::JSONCompat.to_json_pretty(after_data_bag_item))
+    puts 'Encrypted and saved changes.'
+  else
+    puts 'No changes detected...'
+  end
+rescue Chef::EncryptedDataBagItem::DecryptionFailure
+  $stderr.puts "Error decrypting data bag item. Are you using the correct key? (#{options[:secret_file]})"
+  exit 1
+ensure
+  temp_file.close
+  temp_file.unlink
+end
