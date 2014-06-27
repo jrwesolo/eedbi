@@ -12,12 +12,14 @@ Ideally, encrypted data bag items will be stored in a version control system in 
 edit_encrypted_data_bag_item <data bag item> [options]
 ```
 
-| Option | Description | Default |
-| --------: | :---------- | :------ |
-| `-s` `--secret` | location of encrypted data bag secret | `$ENCRYPTED_DATA_BAG_SECRET` or `$HOME/.chef/encrypted_data_bag_secret` |
-| `-f` `--format` | [encrypted data bag version](http://docs.opscode.com/chef/essentials_data_bags.html#encryption-versions) | `2` (recommended, requires Chef >= 11.6) |
-| `-e` `--editor` | editor to use | `$EDITOR` or `vi` |
-| `-h` `--help` | display the usage information | |
+### Options
+
+| Short | Long | Description | Default |
+| ----: | :--- | :---------- | :------ |
+| `-s` | `--secret` | location of encrypted data bag secret | `$ENCRYPTED_DATA_BAG_SECRET` or `$HOME/.chef/encrypted_data_bag_secret` |
+| `-f` | `--format` | [encrypted data bag version](http://docs.opscode.com/chef/essentials_data_bags.html#encryption-versions) | `2` (recommended, requires Chef >= 11.6) |
+| `-e` | `--editor` | editor to use | `$EDITOR` or `vi` |
+| `-h` | `--help` | display the usage information | |
 
 If the encrypted data bag item JSON file already exists, the script will decrypt the data and store it in a plaintext temporary file. If the encrypted data bag item JSON file does not exist, it will create a basic template for you to edit. Once your changes have been made, they will be encrypted and saved back to the original file. The plaintext temporary file will then be deleted.
 
