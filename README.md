@@ -1,10 +1,14 @@
 ## edit_encrypted_data_bag_item
 
-This script is used to aid in the editing of [encrypted data bag items](http://docs.opscode.com/chef/essentials_data_bags.html#encrypt-a-data-bag-item) used in in [Chef](http://docs.opscode.com/chef_overview.html). Encrypted data bag items are encrypted using [shared secret encryption](https://en.wikipedia.org/wiki/Symmetric-key_algorithm). In Chef, this is called your [_encrypted data bag secret_](http://docs.opscode.com/chef/essentials_data_bags.html#secret-keys).
+This script is used to aid in the editing of [encrypted data bag items](http://docs.opscode.com/chef/essentials_data_bags.html#encrypt-a-data-bag-item) used in in [Chef](http://docs.opscode.com/chef_overview.html). 
+
+> A data bag item may be encrypted using [shared secret encryption](https://en.wikipedia.org/wiki/Symmetric-key_algorithm). This allows each data bag item to store confidential information (such as a database password) or to be managed in a source control system (without plain-text data appearing in revision history). Each data bag item may be encrypted individually; if a data bag contains multiple encrypted data bag items, these data bag items are not required to share the same encryption keys.
+
+Ideally, encrypted data bag items will be stored in a version control system in their encrypted form. Editing an encrypted data bag item can be cumbersome to do by hand. Using this script automates the decryption, editing, and encryption process. Hopefully, by making the process easier, it will promote safer storage of sensitive data.
 
 ### Usage
 
-```
+```bash
 edit_encrypted_data_bag_item <data bag item> [options]
 ```
 
@@ -13,15 +17,11 @@ edit_encrypted_data_bag_item <data bag item> [options]
 | `-s` `--secret` | location of encrypted data bag secret | `$ENCRYPTED_DATA_BAG_SECRET` or `$HOME/.chef/encrypted_data_bag_secret` |
 | `-f` `--format` | [encrypted data bag version](http://docs.opscode.com/chef/essentials_data_bags.html#encryption-versions) | `2` |
 | `-e` `--editor` | editor to use | `$EDITOR` or `vi` |
-| `-h` `--help` | display the usage information | |
+| `-h` `--help` | display the usage information | _N/A_ |
 
 If the encrypted data bag item JSON file already exists, the script will decrypt the data and store it in a plaintext temporary file. If the encrypted data bag item JSON file does not exist, it will create a basic template for you to edit. Once your changes have been made, they will be encrypted and saved back to the original file. The plaintext temporary file will then be deleted.
 
-### Dependencies
-
-This script depends on the [chef](https://rubygems.org/gems/chef) gem for the encryption and decryption. Please make sure it is available.
-
-### Preparation
+#### Preparation
 
 You can generate your own encrypted data bag secret using the following command:
 
@@ -29,7 +29,11 @@ You can generate your own encrypted data bag secret using the following command:
 openssl rand -base64 512 | tr -d '\r\n' > encrypted_data_bag_secret
 ```
 
-By default, the script will look in `$ENCRYPTED_DATA_BAG_SECRET` or `$HOME/.chef/encrypted_data_bag_secret`. This can be overridden in the options (see below).
+#### Dependencies
+
+This script depends on the [chef](https://rubygems.org/gems/chef) gem for the encryption and decryption. Please make sure it is available.
+
+By default, the script will look in `$ENCRYPTED_DATA_BAG_SECRET` or `$HOME/.chef/encrypted_data_bag_secret`. This can be overridden in the options (see above).
 
 #### Recovery on Parsing Error
 
