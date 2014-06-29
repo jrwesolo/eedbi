@@ -1,4 +1,4 @@
-# edit_encrypted_data_bag_item
+# eedbi (Edit Encrypted Data Bag Item)
 
 This script is used to aid in the editing of [encrypted data bag items](http://docs.opscode.com/chef/essentials_data_bags.html#encrypt-a-data-bag-item) used in in [Chef](http://docs.opscode.com/chef_overview.html). 
 
@@ -9,7 +9,7 @@ Ideally, encrypted data bag items will be stored in a version control system in 
 ## Usage
 
 ```bash
-edit_encrypted_data_bag_item <data bag item> [options]
+eedbi <data bag item> [options]
 ```
 
 ### Options
