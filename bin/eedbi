@@ -8,6 +8,8 @@ rescue LoadError
   exit 1
 end
 
+require 'yajl'
+
 ############################
 ### command line options ###
 ############################
@@ -78,7 +80,8 @@ end
 ### Begin actual work ###
 #########################
 
-temp_file = Tempfile.new "#{(0..8).map { rand(36).to_s(36) }.join}-"
+temp_file = Tempfile.new ["#{File.basename(item_file_path, '.*')}-",
+                          File.extname(item_file_path)]
 md5_before = nil
 md5_after = nil
 begin
