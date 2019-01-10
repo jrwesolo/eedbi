@@ -1,0 +1,31 @@
+{
+  "id": "test",
+  "test_1": {
+    "encrypted_data": "AIjAFDp447iqvm6+QTmB66j+SyvE9A==\n",
+    "iv": "CGteR/5ES0XIYvia\n",
+    "auth_tag": "78sUvEfQfVbFNjUvZ23WJg==\n",
+    "version": 3,
+    "cipher": "aes-256-gcm"
+  },
+  "test_2": {
+    "encrypted_data": "FE2c0SXHok13iooNH19QLI2rbpL0ig==\n",
+    "iv": "fhpcMircDF/gsQXX\n",
+    "auth_tag": "lkQ9szmqgXYeAdV2Lwmg7A==\n",
+    "version": 3,
+    "cipher": "aes-256-gcm"
+  },
+  "test_3": {
+    "encrypted_data": "1PKX4BAj2w3cGi43r8Rkcn0IcQiK\n",
+    "iv": "Goiho8ZwDEEJjQwo\n",
+    "auth_tag": "WkIixFlRPzXM9wyRpc0M6w==\n",
+    "version": 3,
+    "cipher": "aes-256-gcm"
+  },
+  "test_4": {
+    "encrypted_data": "1ouohtA5T+2FqWqPjLYY9F1+vFvb\n",
+    "iv": "RQ5oPgyc3VSG4L67\n",
+    "auth_tag": "zJ7Ijx4yIOl/6ERMhlkQ6Q==\n",
+    "version": 3,
+    "cipher": "aes-256-gcm"
+  }
+}
