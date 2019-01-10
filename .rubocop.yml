@@ -1,2 +1,2 @@
-LineLength:
-  Enabled: false
+Metrics/LineLength:
+  Max: 120

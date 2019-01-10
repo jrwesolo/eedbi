@@ -1,56 +1,142 @@
 #!/usr/bin/env ruby
-# encoding: utf-8
 
 begin
   require 'chef'
-rescue LoadError
-  $stderr.puts "Could not load 'chef', please make sure this gem is installed."
+  require 'json'
+rescue LoadError => e
+  warn "Gem dependency error: #{e.message}"
   exit 1
 end
 
-require 'yajl'
+def edit_json(editor, hash) # rubocop:disable Metrics/MethodLength , Metrics/AbcSize
+  file = Tempfile.new(['', '.json'])
+  file.write(JSON.pretty_generate(hash))
+  file.rewind # ensure file is written
+
+  begin
+    system(editor, file.path)
+    file.open # Reopen file after edit
+    JSON.parse(file.read)
+  rescue JSON::ParserError
+    while true # rubocop:disable Style/InfiniteLoop, Lint/LiteralAsCondition
+      $stderr.print 'Unable to parse JSON. Edit again [Y/N]? '
+      case gets.strip.downcase
+      when 'y', 'yes'
+        retry
+      when 'n', 'no'
+        break
+      end
+    end
+  ensure
+    file.close
+    file.unlink
+  end
+end
 
 ############################
 ### command line options ###
 ############################
 
 options = {}
-options[:secret_file] = ENV['ENCRYPTED_DATA_BAG_SECRET'] ||
-                        File.join(ENV['HOME'], '.chef', 'encrypted_data_bag_secret')
-options[:format_version] = 2
+# https://docs.chef.io/data_bags.html#encryption-versions
+options[:format] = if Chef::VERSION.to_f < 11.0
+                     0
+                   elsif Chef::VERSION.to_f < 11.6
+                     1
+                   elsif Chef::VERSION.to_f < 12.0
+                     2
+                   else
+                     3
+                   end
+
+# Possible default locations to look for encrypted data bag secret
+# Order matters: first one to exist is chosen.
+secret_file_candidates = [
+  ENV['ENCRYPTED_DATA_BAG_SECRET'].to_s,
+  './encrypted_data_bag_secret',
+  ::File.join(ENV['HOME'].to_s, '.chef', 'encrypted_data_bag_secret'),
+  '/etc/chef/encrypted_data_bag_secret'
+]
+
+# Check for a valid default for secret_file
+secret_file_candidates.each do |candidate|
+  if ::File.exist?(candidate)
+    options[:default_secret_file] = candidate
+    break
+  end
+end
+
 options[:editor] = ENV['EDITOR'] || 'vi'
 
-OptionParser.new do |opts|
+option_parser = OptionParser.new do |opts| # rubocop:disable Metrics/BlockLength
   opts.banner = "Usage: #{File.basename($PROGRAM_NAME)} <data bag item> [options]"
-  opts.on('-s',
-          '--secret file',
-          'encrypted data bag secret file',
-          '(default: $ENCRYPTED_DATA_BAG_SECRET or $HOME/.chef/encrypted_data_bag_secret)') do |secret|
+  opts.on('-s', '--secret-file PATH',
+          'Location of the encrypted data bag secret file',
+          'Default locations (in order of precedence):',
+          '  $ENCRYPTED_DATA_BAG_SECRET',
+          '  ./encrypted_data_bag_secret',
+          '  ~/.chef/encrypted_data_bag_secret',
+          '  /etc/chef/encrypted_data_bag_secret') do |secret|
     options[:secret_file] = secret
   end
-  opts.on('-f',
-          '--format version',
-          'encrypted data bag format version (default: 2)',
-          'http://docs.opscode.com/chef/essentials_data_bags.html#encryption-versions') do |format|
-    options[:format_version] = format.to_i
+  opts.on('-S', '--secret SECRET',
+          'Secret to use for encryption',
+          'It is preferred to use --secret-file to avoid',
+          'leaking the secret or viewing it in plain text.') do |secret|
+    options[:secret] = secret.strip
   end
-  opts.on('-e',
-          '--editor name',
-          'editor to use (default: $EDITOR or vi)') do |editor|
+  opts.on('-e', '--editor EDITOR',
+          "Editor to use (default: #{options[:editor]})") do |editor|
     options[:editor] = editor
+  end
+  opts.on('-f', '--force',
+          'Re-encrypt all keys even if there are no changes',
+          '(default: only re-encrypt changed keys)') do
+    options[:force] = true
+  end
+  opts.on('-b', '--batch', 'Do not prompt for file editing') do
+    options[:batch] = true
+  end
+  opts.on('--show', 'Print decrypted data bag item and exit') do
+    options[:show] = true
+  end
+  opts.on('--format VERSION',
+          "Encryption version (default: #{options[:format]})") do |format|
+    options[:format] = format.to_i
   end
   opts.on_tail('-h', '--help', 'Show this message') do
     puts opts
     exit
   end
-end.parse!
+end
 
-##########################
-### Verify secret file ###
-##########################
+begin
+  option_parser.parse!
+rescue OptionParser::ParseError => e
+  warn e.message
+  warn "\n#{option_parser}"
+  exit 1
+end
 
-unless File.exist?(options[:secret_file])
-  $stderr.puts "Could not find encrypted data bag secret at #{options[:secret_file]}, exiting."
+###############################
+### Verify required options ###
+###############################
+
+# Set default secret_file if we don't have a secret_file or secret provided
+options[:secret_file] = options[:default_secret_file] unless options[:secret_file] || options[:secret]
+
+if options[:secret_file] && options[:secret]
+  warn 'Only choose one options: --secret-file, --secret'
+  exit 1
+elsif !(options[:secret_file] || options[:secret])
+  warn 'One of the following options is required: --secret-file, --secret'
+  warn "\n#{option_parser}"
+  exit 1
+elsif options[:secret_file] && !::File.exist?(options[:secret_file])
+  warn "File missing: #{options[:secret_file]}"
+  exit 1
+elsif options[:secret] && options[:secret].empty?
+  warn 'Invalid zero length secret'
   exit 1
 end
 
@@ -58,69 +144,115 @@ end
 ### Initial data setup ###
 ##########################
 
-secret = Chef::EncryptedDataBagItem.load_secret options[:secret_file]
-Chef::Config[:data_bag_encrypt_version] = options[:format_version]
-
-item_file_path = ARGV.pop
-if item_file_path.nil?
-  $stderr.puts 'Data bag item missing!'
+if ARGV.empty?
+  warn 'Required parameter missing: <data bag item>'
+  warn "\n#{option_parser}"
+  exit 1
+elsif ARGV.size > 1
+  warn "Only one data bag item is supported (received #{ARGV.size})"
   exit 1
 end
-recovery_file_path = File.join(File.dirname(item_file_path), ".#{File.basename(item_file_path)}.saved")
 
-if File.exist?(item_file_path)
-  item_file_contents = IO.read(item_file_path)
-else
-  item_base_name = File.basename(item_file_path, '.*')
-  puts "Data bag item '#{item_base_name}' doesn't exist, creating template..."
-  item_file_contents = "{ \"id\": \"#{item_base_name}\" }"
-end
+file_path = ARGV.pop
+file_base = ::File.basename(file_path, '.json')
+
+Chef::Config[:data_bag_encrypt_version] = options[:format]
+secret = if options[:secret_file]
+           begin
+             Chef::EncryptedDataBagItem.load_secret(options[:secret_file])
+           rescue ArgumentError => e
+             warn e.message
+             exit 1
+           end
+         else
+           options[:secret]
+         end
+
+before_encrypted_hash = if ::File.exist?(file_path)
+                          begin
+                            JSON.parse(IO.read(file_path))
+                          rescue JSON::ParserError
+                            warn "Unable to parse JSON: #{file_path}"
+                            exit 1
+                          end
+                        else
+                          {}
+                        end
 
 #########################
 ### Begin actual work ###
 #########################
 
-temp_file = Tempfile.new ["#{File.basename(item_file_path, '.*')}-",
-                          File.extname(item_file_path)]
-md5_before = nil
-md5_after = nil
 begin
-  if File.exist? recovery_file_path
-    $stderr.puts "Recovering from #{recovery_file_path}..."
-    temp_file.write IO.read(recovery_file_path)
-    File.delete(recovery_file_path)
+  before_plain_hash = Chef::EncryptedDataBagItem.new(before_encrypted_hash, secret).to_hash
+rescue Chef::EncryptedDataBagItem::DecryptionFailure => e
+  warn 'Unable to decrypt the data bag item.'
+  if e.message.include?('wrong final block length')
+    warn 'Is the data bag item encrypted?'
   else
-    # read in encrypted data bag
-    before_raw_hash = Chef::JSONCompat.from_json(item_file_contents)
-    before_data_bag_item = Chef::EncryptedDataBagItem.new(before_raw_hash, secret)
-    # write unencrypted data bag contents to temporary file for editing
-    unencrypted_before = Chef::JSONCompat.to_json_pretty(before_data_bag_item.to_hash)
-    md5_before = Digest::MD5.hexdigest(unencrypted_before)
-    temp_file.write unencrypted_before
+    warn 'Are you using the correct key?'
   end
-  temp_file.rewind # needed so file is actually written
-  system("#{options[:editor]} #{temp_file.path}")
-  # read in edits, validate parsing
-  begin
-    unencrypted_after = IO.read(temp_file.path)
-    md5_after = Digest::MD5.hexdigest(unencrypted_after)
-    after_raw_hash = Chef::JSONCompat.from_json(unencrypted_after)
-  rescue Yajl::ParseError
-    $stderr.puts "Error parsing JSON! Recovering to #{recovery_file_path}..."
-    IO.write(recovery_file_path, IO.read(temp_file.path))
+  exit 1
+end
+
+if options[:show]
+  if ::File.exist?(file_path)
+    puts JSON.pretty_generate(before_plain_hash)
+    exit 0
+  else
     exit 1
   end
-  if !md5_before.eql?(md5_after)
-    after_data_bag_item = Chef::EncryptedDataBagItem.encrypt_data_bag_item(after_raw_hash, secret)
-    IO.write(item_file_path, Chef::JSONCompat.to_json_pretty(after_data_bag_item))
-    puts 'Encrypted and saved changes.'
-  else
-    puts 'No changes detected...'
-  end
-rescue Chef::EncryptedDataBagItem::DecryptionFailure
-  $stderr.puts "Error decrypting data bag item. Are you using the correct key? (#{options[:secret_file]})"
-  exit 1
-ensure
-  temp_file.close
-  temp_file.unlink
 end
+
+hash_to_edit = before_plain_hash.empty? ? { 'id' => file_base } : before_plain_hash
+
+begin
+  if !$stdin.tty?
+    after_plain_hash = JSON.parse(ARGF.read)
+    raise ArgumentError, 'JSON from STDIN must be a Hash' unless after_plain_hash.is_a?(Hash)
+  elsif !$stdout.tty? || options[:batch]
+    after_plain_hash = hash_to_edit
+  else
+    after_plain_hash = edit_json(options[:editor], hash_to_edit)
+  end
+rescue ArgumentError => e
+  warn e.message
+  exit 1
+rescue JSON::ParserError
+  warn 'Unable to parse JSON from STDIN'
+  exit 1
+end
+
+# Exit if editing temporary file failed
+unless after_plain_hash
+  warn 'Changes discarded'
+  exit 1
+end
+
+# Exit now if no changes detected and option force is not set.
+# We need to check both on hash equality and hash key order.
+if before_plain_hash.eql?(after_plain_hash) &&
+   before_plain_hash.keys.eql?(after_plain_hash.keys) &&
+   !options[:force]
+  puts 'No changes found'
+  exit 0
+end
+
+begin
+  after_encrypted_hash = Chef::EncryptedDataBagItem.encrypt_data_bag_item(after_plain_hash, secret).to_hash
+rescue Chef::EncryptedDataBagItem::UnsupportedEncryptedDataBagItemFormat => e
+  warn e.message
+  exit 1
+end
+
+unless options[:force]
+  # Restore encrypted hash key to the old value if it
+  # didn't change. This will minimize diff when only
+  # updating a subset of keys in a data bag item.
+  after_plain_hash.each do |k, v|
+    after_encrypted_hash[k] = before_encrypted_hash[k] if v.eql?(before_plain_hash[k])
+  end
+end
+
+IO.write(file_path, "#{JSON.pretty_generate(after_encrypted_hash)}\n")
+puts 'Changes saved'
