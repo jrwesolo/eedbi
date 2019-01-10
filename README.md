@@ -45,6 +45,4 @@ In the event that there is a JSON parsing error, a copy of the edits (in plainte
 
 This message may be displayed when the data is decrypted and encrypted. This is due to code internal to the chef gem and therefore cannot be avoided. It is safe to ignore this error and it will eventually go away once the offending code is removed from future releases of the chef gem.
 
-## Contributors
 
-Jordan Wesolowski (<jrwesolo@gmail.com>)
