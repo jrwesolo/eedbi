@@ -12,6 +12,11 @@ class CommentsTest < Minitest::Test
     File.write(path('v3.json'), File.read(path('v3.json')).sub("{\n", "{\n  // owner: db team\n"))
   end
 
+  def test_reading_works
+    assert_equal "hunter2\n", eedbi('read', path('v3.json'), 'password').out
+    assert_equal 0, eedbi('check', path('v3.json')).status
+  end
+
   def test_writing_drops_them
     r = eedbi('set', path('v3.json'), 'password', stdin: 'x', interactive: false)
     assert_equal report('v3.json', 'changed "password"'), r.out, r.err

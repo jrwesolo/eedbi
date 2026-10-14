@@ -129,4 +129,16 @@ class ReadTest < Minitest::Test
     r = eedbi('read', '-', 'password', stdin: File.read(path('v3.json')), interactive: false)
     assert_equal "hunter2\n", r.out, r.err
   end
+
+  def test_item_from_stdin_rules
+    assert_match(/stdin is a terminal/, eedbi('read', '-', interactive: true).err)
+    assert_match(/Only one item can come from stdin/, eedbi('check', '-', '-', interactive: false).err)
+    assert_match(/Only read, list and check can read the item from stdin/, eedbi('edit', '-', interactive: true).err)
+    # write, import and set read stdin themselves; ITEM is the file they write.
+    assert_equal "eedbi write reads stdin without -; ITEM is the file it writes: eedbi write ITEM < plain.json\n",
+                 eedbi('write', '-', interactive: false).err
+    assert_match(/eedbi import ITEM < item\.json/, eedbi('import', '-', interactive: false, secret: false).err)
+    assert_match(/eedbi set ITEM KEY < value\.txt/, eedbi('set', '-', 'k', interactive: false).err)
+    assert_match(/no key "-"/, eedbi('read', path('v3.json'), '-', interactive: true).err, 'a key named - is a key')
+  end
 end

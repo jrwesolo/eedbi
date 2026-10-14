@@ -34,6 +34,14 @@ class CLITest < Minitest::Test
     assert_match(/Unknown command 'nope'\. Run 'eedbi help'/, eedbi('nope', secret: false).err)
   end
 
+  def test_typos_get_a_suggestion
+    assert_match(/Unknown command 'raed'\. Did you mean 'read'\?/, eedbi('raed', secret: false).err)
+    r = eedbi('check', path('v3.json'), '--qiuet')
+    assert_equal 2, r.status
+    assert_match(/invalid option: --qiuet\. Did you mean '--quiet'\?/, r.err)
+    assert_match(/invalid argument: --format yaml\n/, eedbi('check', path('v3.json'), '--format', 'yaml').err)
+  end
+
   def test_help_shows_examples_and_environment
     Eedbi::CLI::COMMANDS.each_key do |name|
       assert_match(/^Examples:\n  .*eedbi #{name} /, eedbi('help', name, secret: false).out, name)
@@ -78,6 +86,14 @@ class CLITest < Minitest::Test
     refute_match(/Did you mean/, eedbi('read', path('nothing')).err)
     assert_match(/new items need a \.json file name, as knife expects: .*nothing\.json\n\z/,
                  eedbi('set', path('nothing'), 'a', stdin: 'x', interactive: false).err)
+  end
+
+  def test_item_count
+    assert_equal 2, eedbi('edit').status
+    assert_match(/needs an item/, eedbi('edit').err)
+    assert_match(/needs at least one item/, eedbi('check').err)
+    assert_match(/takes one item \(received 2 arguments\)/, eedbi('write', path('v1.json'), path('v2.json')).err)
+    assert_match(/takes ITEM and an optional KEY \(received 3/, eedbi('edit', path('v1.json'), 'a', 'b').err)
   end
 
   def test_secret_prompt
@@ -133,6 +149,21 @@ class CLITest < Minitest::Test
     assert_equal 1, r.status
     assert_match(/v3\.json: permission denied/, r.err)
     refute_match(/\.rb:\d+/, r.err, 'printed a backtrace')
+  end
+
+  def test_directories_are_reported
+    FileUtils.mkdir(path('bag'))
+    r = eedbi('read', path('bag'))
+    assert_equal 1, r.status
+    assert_equal "#{path('bag')} is a directory; pass the items in it, " \
+                 "for example #{File.join(path('bag'), '*.json')}\n", r.err
+
+    r = eedbi('check', path('bag'), path('v3.json'))
+    assert_match(/^FAIL  .*bag: .*bag is a directory/, r.out)
+    assert_match(/^ok    .*v3\.json/, r.out)
+
+    r = eedbi('read', path('v3.json'), '-s', path('bag'), secret: false)
+    assert_equal "#{path('v3.json')}: secret file is a directory: #{path('bag')}\n", r.err
   end
 
   # As in knife, --version works after any command and ignores the rest,

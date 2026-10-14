@@ -9,7 +9,7 @@ module Eedbi
   # --secret-prompt.
   class CLI
     COMMANDS = [Commands::Edit, Commands::Read, Commands::List, Commands::Write, Commands::Import, Commands::Set,
-                Commands::Unset, Commands::Rename]
+                Commands::Unset, Commands::Rename, Commands::Check]
                .to_h { |klass| [klass.command_name, klass] }.freeze
 
     def initialize(argv, stdin: $stdin, stdout: $stdout, stderr: $stderr, interactive: nil, console: nil)
