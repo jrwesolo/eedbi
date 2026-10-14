@@ -1,3 +1,3 @@
 # Contributors
 
-* [Jordan Wesolowski][https://github.com/jrwesolo]
+* [Jordan Wesolowski](https://github.com/jrwesolo)
