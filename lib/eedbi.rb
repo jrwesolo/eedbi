@@ -104,3 +104,6 @@ end
 
 require_relative 'eedbi/crypto'
 require_relative 'eedbi/item'
+require_relative 'eedbi/editor'
+require_relative 'eedbi/secret'
+require_relative 'eedbi/store'
