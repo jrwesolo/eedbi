@@ -1,0 +1,52 @@
+{
+  "id": "mixed",
+  "password": "pA8ddThJ1f24tPX9Cvhi0w==\n",
+  "empty": {
+    "encrypted_data": "MZVcx+PAqooLllOkll6Z7UsGnA3BcG9cbFpo06KviEI=\n",
+    "iv": "YfKNDSpO7MCTBweyuoLVSg==\n",
+    "version": 1,
+    "cipher": "aes-256-cbc"
+  },
+  "port": {
+    "encrypted_data": "F0KPJMDQ1VM4+VewZaXGfeaG/Zki2wuw1UfJuz50Ncs=\n",
+    "hmac": "m8mSYk4Mqejjbm4o0BFdLbb5EyaCLxM5vJ/JyJnhmXk=\n",
+    "iv": "MoiQoFqMs2f7kZs55MC9vw==\n",
+    "version": 2,
+    "cipher": "aes-256-cbc"
+  },
+  "ratio": {
+    "encrypted_data": "QwCyS2dJmAYVeFPoREWgkP1xYEg6\n",
+    "iv": "Tjd3/BMnzaTuN1oW\n",
+    "auth_tag": "Di+Zw354nGYKtQE93AEjaw==\n",
+    "version": 3,
+    "cipher": "aes-256-gcm"
+  },
+  "enabled": "Zs2lhhcBw7oMBV7y7l61vA==\n",
+  "disabled": {
+    "encrypted_data": "m8JpjWhBLgbcHykCmDtNAPlAftRcJbDuf4uO5g5pYtM=\n",
+    "iv": "zljaqqpI/1Y2w93aMgXFGQ==\n",
+    "version": 1,
+    "cipher": "aes-256-cbc"
+  },
+  "none": {
+    "encrypted_data": "E0fJ0jDa4MpsV5PEqdWUYUdbcMF1XvYvPsPjlZ2yN24=\n",
+    "hmac": "z5SxD5XqPqZar249jCK2kx6VBK4v8PGR4okWl/euy8Q=\n",
+    "iv": "UG05Q5NEr8Sff70Af8OenQ==\n",
+    "version": 2,
+    "cipher": "aes-256-cbc"
+  },
+  "list": {
+    "encrypted_data": "rvpn+2xo13Trlp9m27v/QZeIRroyUEGulkRh8etSyw==\n",
+    "iv": "iyUvDIWAnO7jtofa\n",
+    "auth_tag": "OYVH4k1b1+V594Dlop+KPQ==\n",
+    "version": 3,
+    "cipher": "aes-256-gcm"
+  },
+  "nested": "t+AB60mRYzpsbFsf433MHx7ltkpZgYvSHjzzfocLcyJRNua4DkdwcUXTLTqQ\ni5/g\n",
+  "unicode": {
+    "encrypted_data": "k5WyhvCOtBgxZUHxWY8J+kqh0wLhiclGgKZiO9s5iYwFJf4oQ7duTVL/i0mT\nVJxT\n",
+    "iv": "hxqOGRMnVaY7ONRY5l7K3w==\n",
+    "version": 1,
+    "cipher": "aes-256-cbc"
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "id": "v3",
+  "password": {
+    "encrypted_data": "UxmFY550KCk333JEO4uWCmdVgWADpl7aYc8=\n",
+    "iv": "yyBmlIEL9K3Fhycs\n",
+    "auth_tag": "1E4Zmw8PB7UtC6efx51Nhg==\n",
+    "version": 3,
+    "cipher": "aes-256-gcm"
+  },
+  "empty": {
+    "encrypted_data": "oFX/u5kMb8lKOraE7Jy/nzgjjg==\n",
+    "iv": "PBFKQ/88Cgd7G+o/\n",
+    "auth_tag": "U0KMUedkT3u1rPsufgezJw==\n",
+    "version": 3,
+    "cipher": "aes-256-gcm"
+  },
+  "port": {
+    "encrypted_data": "HlsQ/jThjHfbvvEtiJsFo+d3pySi\n",
+    "iv": "yXL3tNNtBBZQvtWr\n",
+    "auth_tag": "Yqc/81D6p2wuWuOrAVunNQ==\n",
+    "version": 3,
+    "cipher": "aes-256-gcm"
+  },
+  "ratio": {
+    "encrypted_data": "pYFTCdtL5mSyOfGE7aCCcY14VrY0\n",
+    "iv": "3JxADweBLYVk/6ht\n",
+    "auth_tag": "cMNWm8GB1ko166RMdblTHg==\n",
+    "version": 3,
+    "cipher": "aes-256-gcm"
+  },
+  "enabled": {
+    "encrypted_data": "ddzf5e97wpnwaJjBkxoXWnvc851q\n",
+    "iv": "+0pV18gdzqSJUoSC\n",
+    "auth_tag": "iNCsIDPmLGH/lo3MAYQ6+g==\n",
+    "version": 3,
+    "cipher": "aes-256-gcm"
+  },
+  "disabled": {
+    "encrypted_data": "cU7/CjE0UprXnaAPGDkMUs2wIoi/cg==\n",
+    "iv": "cvWCz2Ns2NsGIc1s\n",
+    "auth_tag": "tl+HQt9R59d+C6nzZZ1HEA==\n",
+    "version": 3,
+    "cipher": "aes-256-gcm"
+  },
+  "none": {
+    "encrypted_data": "q2iGXkO4fd9KXQVWqFafok0VtjIg\n",
+    "iv": "nfcT+ysJ2u0zfAj5\n",
+    "auth_tag": "S2uEl3je1Qu5alIotKKbGg==\n",
+    "version": 3,
+    "cipher": "aes-256-gcm"
+  },
+  "list": {
+    "encrypted_data": "/jLc+Y7Vcy2zXKaWw3m3kayDc5ygQSX9bBRfhLIyNQ==\n",
+    "iv": "sd7OviEP6zFUFquP\n",
+    "auth_tag": "rJVhqCbC+lhIms6Rqu7LYg==\n",
+    "version": 3,
+    "cipher": "aes-256-gcm"
+  },
+  "nested": {
+    "encrypted_data": "BM/pUSOqu2A5BCvSTrLdUjesqs/s1Oz4iaFvY0ZwGebS7ibtN8koqChjoup7\nJyCN2aDZYjGJ1eclZA==\n",
+    "iv": "tCsqC0scA7d8GKDn\n",
+    "auth_tag": "WJHHL9/QLnzPc3rcOjkYdA==\n",
+    "version": 3,
+    "cipher": "aes-256-gcm"
+  },
+  "unicode": {
+    "encrypted_data": "YJfYJMd4Q/EHEZVrIjXO+fgmc2D55sl77qkYQ3TxvYcBnUSdegfHAA==\n",
+    "iv": "SN3jD93AI6Rcux3V\n",
+    "auth_tag": "DuZ3vBJq43WxzM1nuDws3w==\n",
+    "version": 3,
+    "cipher": "aes-256-gcm"
+  }
+}
