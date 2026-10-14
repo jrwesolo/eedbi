@@ -8,8 +8,8 @@ module Eedbi
   # such as Windows CI runners. `console:` replaces IO.console for
   # --secret-prompt.
   class CLI
-    COMMANDS = [Commands::Edit, Commands::Read, Commands::List, Commands::Write, Commands::Import, Commands::Set,
-                Commands::Unset, Commands::Rename, Commands::Migrate, Commands::Check, Commands::Rekey]
+    COMMANDS = [Commands::Edit, Commands::Read, Commands::List, Commands::Write, Commands::Import, Commands::Set, Commands::Unset,
+                Commands::Rename, Commands::Migrate, Commands::Check, Commands::Rekey, Commands::NewSecret]
                .to_h { |klass| [klass.command_name, klass] }.freeze
 
     def initialize(argv, stdin: $stdin, stdout: $stdout, stderr: $stderr, interactive: nil, console: nil)
