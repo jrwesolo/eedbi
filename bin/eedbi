@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Before loading eedbi, which an older Ruby cannot even parse, as when a
+# checkout's bin is on the PATH and the first ruby there is the one macOS
+# ships. Keep in step with required_ruby_version in eedbi.gemspec.
+if (RUBY_VERSION.split('.').map(&:to_i) <=> [3, 1]).negative?
+  require 'rbconfig'
+  abort "eedbi needs Ruby 3.1 or newer, but #{RbConfig.ruby} is Ruby #{RUBY_VERSION}"
+end
+
+require_relative '../lib/eedbi'
+
+exit Eedbi.main(ARGV)

@@ -102,8 +102,22 @@ module Eedbi
   end
 end
 
+require_relative 'eedbi/version'
 require_relative 'eedbi/crypto'
 require_relative 'eedbi/item'
 require_relative 'eedbi/editor'
 require_relative 'eedbi/secret'
 require_relative 'eedbi/store'
+require_relative 'eedbi/commands/options'
+require_relative 'eedbi/commands/changes'
+require_relative 'eedbi/commands/item_input'
+require_relative 'eedbi/commands/base'
+require_relative 'eedbi/commands/edit'
+require_relative 'eedbi/commands/read'
+require_relative 'eedbi/commands/list'
+require_relative 'eedbi/commands/write'
+require_relative 'eedbi/commands/import'
+require_relative 'eedbi/commands/set'
+require_relative 'eedbi/commands/unset'
+require_relative 'eedbi/commands/rename'
+require_relative 'eedbi/cli'
