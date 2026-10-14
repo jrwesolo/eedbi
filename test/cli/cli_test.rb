@@ -21,6 +21,14 @@ class CLITest < Minitest::Test
     end
   end
 
+  def test_help_for_a_command
+    r = eedbi('help', 'rekey', secret: false)
+    assert_equal 0, r.status
+    assert_match(/Usage: eedbi rekey \[options\] ITEM\.\.\./, r.out)
+    assert_match(/--new-secret-file/, r.out)
+    assert_equal r.out, eedbi('rekey', '--help', secret: false).out
+  end
+
   def test_version
     r = eedbi('--version', secret: false)
     assert_equal 0, r.status
@@ -65,6 +73,14 @@ class CLITest < Minitest::Test
     end
   end
 
+  def test_options_of_other_commands_are_rejected
+    %w[read rekey unset rename check].each do |command|
+      r = eedbi(command, path('v3.json'), '--encrypt-version', '3')
+      assert_equal 2, r.status, command
+      assert_match(/invalid option: --encrypt-version/, r.err, command)
+    end
+  end
+
   def test_new_items_need_a_json_file_name
     r = eedbi('set', path('example'), 'a', stdin: 'x', interactive: false)
     assert_equal 1, r.status
@@ -88,6 +104,14 @@ class CLITest < Minitest::Test
                  eedbi('set', path('nothing'), 'a', stdin: 'x', interactive: false).err)
   end
 
+  def test_format_accepts_only_supported_versions
+    %w[0 4 03 0x3 three].each do |version|
+      r = eedbi('migrate', path('v1.json'), '--encrypt-version', version)
+      assert_equal 2, r.status, version
+      assert_match(/invalid argument: --encrypt-version #{version}/, r.err)
+    end
+  end
+
   def test_item_count
     assert_equal 2, eedbi('edit').status
     assert_match(/needs an item/, eedbi('edit').err)
@@ -101,6 +125,18 @@ class CLITest < Minitest::Test
     r = eedbi('read', path('v3.json'), 'password', '--secret-prompt', secret: false, console: console)
     assert_equal 0, r.status, r.err
     assert_equal "hunter2\n", r.out
+  end
+
+  # One usage error before any item is read, not one failure per item.
+  def test_secret_file_and_prompt_are_exclusive
+    r = eedbi('read', path('missing.json'), '--secret-prompt', console: FakeConsole.new('x'))
+    assert_equal 2, r.status
+    assert_equal "Choose one of --secret-file and --secret-prompt\n", r.err
+    %w[migrate check].each do |command|
+      r = eedbi(command, path('v2.json'), path('v3.json'), '--secret-prompt', console: FakeConsole.new('x'))
+      assert_equal [2, 1], [r.status, r.err.scan('Choose one of').size], command
+      assert_empty r.out, command
+    end
   end
 
   def test_secret_found_in_working_directory
