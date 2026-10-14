@@ -22,6 +22,12 @@ namespace :test do
   end
 end
 
+desc 'Build the gem into pkg/'
+task :build do
+  FileUtils.mkdir_p('pkg')
+  sh 'gem build eedbi.gemspec --output pkg/eedbi.gem'
+end
+
 begin
   require 'rubocop/rake_task'
   RuboCop::RakeTask.new
