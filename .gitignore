@@ -1,0 +1,10 @@
+# Built gems (rake build)
+/pkg/
+*.gem
+
+# Bundler, if used locally
+/.bundle/
+Gemfile.lock
+
+# Coverage reports
+/coverage/

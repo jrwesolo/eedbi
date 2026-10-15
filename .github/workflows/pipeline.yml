@@ -1,0 +1,149 @@
+---
+name: pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # Weekly, so that drift is caught without waiting for someone to push:
+  # runner images, Ruby patch releases and the vim and neovim packages all
+  # move underneath pinned labels and versions.
+  schedule:
+    - cron: '0 12 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A new push to a pull request cancels the run it supersedes. Runs on main
+# are left to finish.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
+        with:
+          ruby-version: '3.4'
+      - name: RuboCop
+        run: |
+          gem install rubocop -v 1.90.0 --no-document
+          rubocop --format github
+      - name: Gem builds
+        run: gem build eedbi.gemspec --strict
+      # From the author's container, pinned by tag and digest, since the
+      # runner images do not carry actionlint.
+      - name: Actionlint
+        run: >-
+          docker run --rm --volume "${PWD}:/repo" --workdir /repo
+          rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667
+          -color
+
+  # The Ruby versions to test, computed at run time rather than listed here:
+  # every version ruby-lang.org still maintains, plus head, plus anything
+  # from min_version up that has since left that list. So a new Ruby release
+  # joins the matrix on its own, and the oldest supported version stays
+  # tested after it reaches end of life. min_version is the support floor;
+  # keep it in step with TargetRubyVersion in .rubocop.yml, required_ruby_version
+  # in eedbi.gemspec, the check in bin/eedbi, and the README.
+  # It is 3.1 because that is the Ruby embedded in Chef and Cinc 18.
+  ruby-versions:
+    name: ruby versions
+    uses: ruby/actions/.github/workflows/ruby_versions.yml@e6eba27f7a9c48ccccb2eef935b8de5ba3facf8b # master
+    with:
+      engine: cruby
+      min_version: 3.1
+
+  # eedbi needs only the standard library. Without Chef installed,
+  # test/compat skips itself. On Windows, the test/system tests that need a
+  # PTY skip themselves, and the vim and neovim smoke tests run wherever
+  # those editors are installed.
+  test:
+    name: test (${{ matrix.os }}, ruby ${{ matrix.ruby }})
+    needs: ruby-versions
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    # head is an early warning for the next Ruby release, not a gate. A
+    # failing head job still reports success to the test gate below
+    # (verified with a deliberately failing head job).
+    continue-on-error: ${{ matrix.ruby == 'head' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-26.04, macos-26, windows-2025]
+        ruby: ${{ fromJSON(needs.ruby-versions.outputs.versions) }}
+        # ruby/setup-ruby has no Ruby 3.1 build for Ubuntu 26.04, since 3.1
+        # reached end of life before that image existed. 24.04 still has one.
+        # Remove both entries when the floor moves past 3.1.
+        exclude:
+          - os: ubuntu-26.04
+            ruby: '3.1'
+        include:
+          - os: ubuntu-24.04
+            ruby: '3.1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
+        with:
+          ruby-version: ${{ matrix.ruby }}
+      # Windows gets vim from Git for Windows, which the smoke test finds on
+      # its own; neovim is not installed there.
+      - name: Install vim and neovim
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y vim neovim
+      - name: Install neovim
+        if: runner.os == 'macOS'
+        run: brew install neovim
+      # Verbose so that the reason for every skipped test is in the log.
+      - name: Tests
+        run: rake test TESTOPTS=-v
+
+  # One status check with a stable name, so that a branch ruleset can require
+  # the matrix without naming each of its jobs, which change whenever a Ruby
+  # version comes or goes. `if: always()` makes it report even when a matrix
+  # job failed; a skipped or cancelled job counts as a failure too, which
+  # also covers ruby-versions failing and the matrix never running.
+  test-gate:
+    name: test
+    needs: [ruby-versions, test]
+    if: always()
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    steps:
+      - name: Check every test job passed
+        if: >-
+          contains(needs.*.result, 'failure') ||
+          contains(needs.*.result, 'cancelled') ||
+          contains(needs.*.result, 'skipped')
+        run: exit 1
+
+  # Compatibility with Chef's own implementation, in both directions, plus
+  # the subprocess and PTY integration tests. Chef is pinned so that a new
+  # release cannot turn pull requests red on its own; the weekly run is
+  # where a bump gets noticed.
+  chef-compat:
+    name: chef-compat
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    env:
+      CHEF_LICENSE: accept-no-persist
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
+        with:
+          ruby-version: '3.4'
+      - name: Install Chef
+        run: gem install chef -v 19.3.15 --no-document
+      # The fixtures must still be exactly what Chef produces from plain.json.
+      - name: Fixtures
+        run: ruby test/fixtures/generate.rb --check
+      - name: Install vim and neovim
+        run: sudo apt-get update && sudo apt-get install -y vim neovim
+      - name: Tests
+        run: rake test TESTOPTS=-v

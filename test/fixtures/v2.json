@@ -1,0 +1,73 @@
+{
+  "id": "v2",
+  "password": {
+    "encrypted_data": "FmdBpG6l5M7HXwpJNn73um61LrG9DZ8XtrMZk+9SbaM=\n",
+    "hmac": "mX53chtkKCre83gzinL+dYCvx1DSExvAs9drdT/ivE8=\n",
+    "iv": "NvVgr6zB8QFNVmaO5lSpjw==\n",
+    "version": 2,
+    "cipher": "aes-256-cbc"
+  },
+  "empty": {
+    "encrypted_data": "iH11TIsX3RoGT92Npg++IkoehEM18gHDVV7tj0rwVUk=\n",
+    "hmac": "jR3dfpm5ACPlNQbp4zKMJbmLBiE7Q5OJspFo6deTgy4=\n",
+    "iv": "NtkDISGNMXVXpPPzETLz6Q==\n",
+    "version": 2,
+    "cipher": "aes-256-cbc"
+  },
+  "port": {
+    "encrypted_data": "pjsoMUMP6kEHvqUcE0yPSdv0obSebkGi1f/keHtNpqY=\n",
+    "hmac": "dI0RDTDdJSMHDHuHeS1XmHAvY8zJZDXZFeLCRnq9uwY=\n",
+    "iv": "K3U6RCH6a4Sof9NNWCzF5A==\n",
+    "version": 2,
+    "cipher": "aes-256-cbc"
+  },
+  "ratio": {
+    "encrypted_data": "rY+lxUkKh7gGpxj0uDB9b8gJaj8VlknPuzpE8qQ0EQE=\n",
+    "hmac": "e3nBG4oTFIlXrgbQcg7RW1AEKsJDMmlKYcvJ31hpYGQ=\n",
+    "iv": "Ks1BsvHXSuoJ2r6RiZLqNQ==\n",
+    "version": 2,
+    "cipher": "aes-256-cbc"
+  },
+  "enabled": {
+    "encrypted_data": "I4gnTwWteaqrG+RwcMsea9XFYqH8h8KHzw6DDAC0fKk=\n",
+    "hmac": "vMjDAaj08muZjoquag4aam7P5W7TAkEOePVfpl/fZDA=\n",
+    "iv": "GtowW/dGsxFIfF/+183/Xw==\n",
+    "version": 2,
+    "cipher": "aes-256-cbc"
+  },
+  "disabled": {
+    "encrypted_data": "x9Rv8sPlWpKQZSCs3KpwQYik1MGZWzAbqiK8o8lr4ek=\n",
+    "hmac": "EjC7/dE5WiEJ9m+EouTlz+Tg19B9Olsl17ZqGHU1bt0=\n",
+    "iv": "avzTlrOD6oPn7RxnneK5Ug==\n",
+    "version": 2,
+    "cipher": "aes-256-cbc"
+  },
+  "none": {
+    "encrypted_data": "FVeAlCgHOTGa7zyvLfWqJK8z7kOKmz928qLnWmj1x+c=\n",
+    "hmac": "Ga0z87taB0Lw2pEw+3X91AqvcfNP6X8y0oWjYqdjFXw=\n",
+    "iv": "Os/E1fL1JzJasTfYYda19A==\n",
+    "version": 2,
+    "cipher": "aes-256-cbc"
+  },
+  "list": {
+    "encrypted_data": "9SwcbjAIL+yREzZfSBAe8dszqHYsj7stnAIUpyg60Og=\n",
+    "hmac": "Zo/5vHxb3aubixMIHmUgsHkFszRwRg5h/gb7WGPXT4c=\n",
+    "iv": "cNBZ00jvZYZwyC9020k2lA==\n",
+    "version": 2,
+    "cipher": "aes-256-cbc"
+  },
+  "nested": {
+    "encrypted_data": "iwvgLvUZAayVNSkIL7nK4HknS4XSEGBsusJkhgdyAwc8CHNBf4fn6ARRAUCK\ngInZ8gkPB8Y/CPCDOSfvn+4b8Q==\n",
+    "hmac": "tnBL1zPryK0Mhg2c0ZGeZoKJW+UPuNoayYTLUk+ZqQg=\n",
+    "iv": "IhVQucjCALMqEED1kKeTOw==\n",
+    "version": 2,
+    "cipher": "aes-256-cbc"
+  },
+  "unicode": {
+    "encrypted_data": "YyuJlS2L2fGr2hUqvjEZsye4vbNZIdNMJlrgmKlJ4vOygJmQzWEgTQHjKIAZ\nQMp3\n",
+    "hmac": "uwrawasVbaNhgcfmp11LyrPHGf+WGDaJg9KQ5z9/iWY=\n",
+    "iv": "uUOH8mYTOJJYMYKuylS6gA==\n",
+    "version": 2,
+    "cipher": "aes-256-cbc"
+  }
+}

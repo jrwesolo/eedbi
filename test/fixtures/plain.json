@@ -1,0 +1,16 @@
+{
+  "id": "plain",
+  "password": "hunter2",
+  "empty": "",
+  "port": 5432,
+  "ratio": 0.75,
+  "enabled": true,
+  "disabled": false,
+  "none": null,
+  "list": [1, "two", null],
+  "nested": {
+    "user": "admin",
+    "roles": ["read", "write"]
+  },
+  "unicode": "Grüße, 東京, 𝄞"
+}

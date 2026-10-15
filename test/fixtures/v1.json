@@ -1,0 +1,63 @@
+{
+  "id": "v1",
+  "password": {
+    "encrypted_data": "daoQiEsRlw4lX7LOzTVtwqcU/NJAShiavUT3cZBtWc8=\n",
+    "iv": "D4xLw/iqaj3bt6FnXrWwgw==\n",
+    "version": 1,
+    "cipher": "aes-256-cbc"
+  },
+  "empty": {
+    "encrypted_data": "J6ZWWPPBw/d1F925ZUP4Q9poLEYnCPhVFVmpqusbQcI=\n",
+    "iv": "HvfltNwFgPIkCJpIgY1FMQ==\n",
+    "version": 1,
+    "cipher": "aes-256-cbc"
+  },
+  "port": {
+    "encrypted_data": "BKylhAg6/A2ONCG2c7W9NxOQxD8Z+y2o0D1g0a4Hzi0=\n",
+    "iv": "/InCS7TqMfvjWrNWbARY0Q==\n",
+    "version": 1,
+    "cipher": "aes-256-cbc"
+  },
+  "ratio": {
+    "encrypted_data": "A+UNZ+xHYivgXvaEUrw952r8TLmZB4bdV0KVeGMsTyI=\n",
+    "iv": "KiSox9EIAMpNGZRO6iXY3w==\n",
+    "version": 1,
+    "cipher": "aes-256-cbc"
+  },
+  "enabled": {
+    "encrypted_data": "DKz6djLvauIA++ledutaPBzhlNST/4B4qhoFi2qShT4=\n",
+    "iv": "NLJ+89B0XRHamhmwPrnV+Q==\n",
+    "version": 1,
+    "cipher": "aes-256-cbc"
+  },
+  "disabled": {
+    "encrypted_data": "J9VfgJKIRpDTyUPP35JuT9VjSoR7/72jo2+LCEPZhio=\n",
+    "iv": "HlUZMZ6nxkuQAjCyTY3ggA==\n",
+    "version": 1,
+    "cipher": "aes-256-cbc"
+  },
+  "none": {
+    "encrypted_data": "h7uMT+PtSRDtJpH7MsqaUwdy7ndbVDOcqmZ2nBN5cPo=\n",
+    "iv": "4MfynQy7QP4kDvV5OsSAig==\n",
+    "version": 1,
+    "cipher": "aes-256-cbc"
+  },
+  "list": {
+    "encrypted_data": "uMcURwI1s3YjrFcgW2iWRrKHUe5SCEt/PpHJHi2fVdE=\n",
+    "iv": "dR8b4UWxvc7G2CCu4D3Cnw==\n",
+    "version": 1,
+    "cipher": "aes-256-cbc"
+  },
+  "nested": {
+    "encrypted_data": "N4chxpk2PH1rDbazASnkOTzq68RAV0E0CkfaxXncGrUWbBaDGlDEdnol2msL\nF9MMjLTwM3uwFONufGz8fBsg8A==\n",
+    "iv": "5G07WY7u6B4g2Tds8iYGZg==\n",
+    "version": 1,
+    "cipher": "aes-256-cbc"
+  },
+  "unicode": {
+    "encrypted_data": "e7rj/NlK33aAF+6zREA5u7NLchYnvgsrkyTb4AqwaN1D4vcV7vNz4gcy5kYr\n679F\n",
+    "iv": "XOKIK5d0KIYGSu7ZNQInmw==\n",
+    "version": 1,
+    "cipher": "aes-256-cbc"
+  }
+}
